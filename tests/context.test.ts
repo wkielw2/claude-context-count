@@ -17,8 +17,27 @@ test('fills the bar by percentage and clamps it', () => {
   expect(bar(130)).toBe('██████████')
 })
 
-test('shows nothing before the first response', () => {
-  expect(describeFill({ window: 200_000 })).toBe(undefined)
+test('shows an empty bar before the first response', () => {
+  expect(describeFill({ window: 200_000 })).toEqual({ amount: '–/200k', bar: '░░░░░░░░░░', level: 'ok' })
+})
+
+test('shows nothing while the window is unknown', () => {
+  expect(describeFill({ window: 0 })).toBe(undefined)
+})
+
+test('shows nothing while the window is negative', () => {
+  expect(describeFill({ window: -1 })).toBe(undefined)
+  expect(describeFill({ tokens: 1000, window: -200_000 })).toBe(undefined)
+})
+
+test('zero measured tokens is a measure, not an unmeasured fill', () => {
+  expect(describeFill({ tokens: 0, window: 200_000 })).toEqual({
+    amount: '0/200k',
+    bar: '░░░░░░░░░░',
+    percent: 0,
+    level: 'ok',
+    note: undefined,
+  })
 })
 
 test('shows tokens, window and percentage', () => {

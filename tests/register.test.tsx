@@ -39,10 +39,27 @@ function engine(on: On, initial: Usage, { isCore = false } = {}) {
 }
 
 for (const surface of SURFACES) {
-  test(`${surface}: without a measure only the engine's drawing is shown`, async ($, on) => {
+  test(`${surface}: before the first response it draws an empty column from the start`, async ($, on) => {
     const clock = mock.clock(on)
     mock.store(on)
     engine(on, { window: 200_000 })
+    await $.session.start(START)
+    await clock.settle()
+
+    const ui = await $.ui.mount({ ...MODE, surface })
+
+    expect(await ui.find({ text: /contexto/ })).not.toBe(undefined)
+    expect((await ui.find({ type: 'Text', text: /░/ }))?.text).toBe('░░░░░░░░░░')
+    expect(await ui.find({ type: 'Text', text: /%/ })).toBe(undefined)
+    expect(await ui.find({ type: 'Text', text: ' –/200k' })).not.toBe(undefined)
+    expect(await ui.find({ type: 'Text', text: 'engine: mode' })).not.toBe(undefined)
+    await ui.unmount()
+  })
+
+  test(`${surface}: without a known window only the engine's drawing is shown`, async ($, on) => {
+    const clock = mock.clock(on)
+    mock.store(on)
+    engine(on, { window: 0 })
     await $.session.start(START)
     await clock.settle()
 
@@ -146,13 +163,31 @@ test('the column follows the usage on each 10 s tick', async ($, on) => {
 
   await clock.advance(9_000)
   const before = await $.ui.mount({ ...MODE, surface: 'terminal' })
-  expect(await before.find({ text: /contexto/ })).toBe(undefined)
+  expect(await before.find({ type: 'Text', text: /%/ })).toBe(undefined)
+  expect(await before.find({ type: 'Text', text: ' –/200k' })).not.toBe(undefined)
   await before.unmount()
 
   await clock.advance(1_000)
   const after = await $.ui.mount({ ...MODE, surface: 'terminal' })
   expect((await after.find({ type: 'Text', text: /%/ }))?.text).toBe(' 50%')
   await after.unmount()
+})
+
+test('the column goes back to the empty form when the usage loses its measure', async ($, on) => {
+  const clock = mock.clock(on)
+  mock.store(on)
+  const usage = engine(on, { tokens: 100_000, window: 200_000, percent: 50 })
+  await $.session.start(START)
+  await clock.settle()
+  usage.current = { window: 200_000 }
+
+  await clock.advance(10_000)
+  const ui = await $.ui.mount({ ...MODE, surface: 'terminal' })
+
+  expect((await ui.find({ type: 'Text', text: /░/ }))?.text).toBe('░░░░░░░░░░')
+  expect(await ui.find({ type: 'Text', text: /%/ })).toBe(undefined)
+  expect(await ui.find({ type: 'Text', text: ' –/200k' })).not.toBe(undefined)
+  await ui.unmount()
 })
 
 test('a failing usage read keeps the last measure and the next tick recovers', async ($, on) => {

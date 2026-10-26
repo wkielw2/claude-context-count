@@ -2,7 +2,8 @@ import type { ContextFill } from '../types'
 
 export type FillLevel = 'ok' | 'warn' | 'danger'
 
-export type FillView = { amount: string; bar: string; percent: number; level: FillLevel; note?: string }
+// `percent` is undefined while nothing is measured yet (before the first response, right after compacting).
+export type FillView = { amount: string; bar: string; percent?: number; level: FillLevel; note?: string }
 
 const BAR_CELLS = 10
 const WARN_PERCENT = 70
@@ -35,9 +36,12 @@ const levelOf = (percent: number): FillLevel => {
 
 const NOTES: Record<FillLevel, string | undefined> = { ok: undefined, warn: 'alto', danger: '⚠ compacta pronto' }
 
-// Undefined before the first response, when there is nothing measured yet.
+export const UNMEASURED = '–'
+
+// Undefined only when the window is unknown; an unmeasured fill still shows an empty bar.
 export function describeFill({ tokens, window, percent }: ContextFill): FillView | undefined {
-  if (tokens === undefined || window <= 0) return undefined
+  if (window <= 0) return undefined
+  if (tokens === undefined) return { amount: `${UNMEASURED}/${compactTokens(window)}`, bar: bar(0), level: 'ok' }
   const used = percent ?? Math.round((tokens / window) * 100)
   const level = levelOf(used)
 

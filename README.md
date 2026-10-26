@@ -12,7 +12,7 @@ contexto
 - **Barra y porcentaje**: tokens que se reenvían en la siguiente petición sobre la ventana de contexto del modelo, las mismas cifras que usa la línea de estado de Claude Code.
 - **Colores**: verde hasta el 70 %, ámbar con «alto» desde el 70 % y rojo con «⚠ compacta pronto» desde el 85 %.
 - **Cuarta fila**: tokens usados / tamaño de la ventana.
-- Se ve siempre, entre turnos y durante ellos. No aparece hasta la primera respuesta de la sesión, cuando aún no hay nada medido, y tras compactar desaparece hasta la siguiente respuesta por el mismo motivo.
+- Se ve siempre desde que arranca la sesión, entre turnos y durante ellos; solo se oculta si el motor no informa del tamaño de la ventana. Antes de la primera respuesta, y justo después de compactar, aún no hay nada medido: la barra sale vacía con `–` en lugar del porcentaje y `–/200k` como detalle (con la ventana del modelo), y se rellena con la siguiente respuesta.
 
 Se actualiza al terminar cada turno, tras cada herramienta, al compactar y cada 10 s. Leer el uso no consume tokens.
 
@@ -46,13 +46,13 @@ claude --plugin-dir .
 
 El último arranca una sesión con el mod cargado desde esta carpeta.
 
-- `hooks/context.ts`: formato puro (tokens compactos, barra, nivel y aviso).
+- `hooks/context.ts`: formato puro (tokens compactos, barra, nivel y aviso). Sin medida devuelve barra vacía, sin porcentaje y `–/<ventana>`; sin ventana, nada.
 - `hooks/register.tsx`: lee el uso con `$.session.usage()`, lo guarda en `$.state` solo si la medida ha cambiado y dibuja la columna en el componente `SessionMode`.
 - `types/index.d.ts`: contrato del estado (`contexto-tokens.fill`).
-- `tests/context.test.ts`: 6 tests del formato (kit `claude-code/testing`).
-- `tests/register.test.tsx`: 16 tests del registro de hooks con un motor simulado: render con y sin medida, conservación del árbol de `next(e)`, separador solo con algo al lado, colores por nivel y umbrales (70 y 85 %), refresco cada 10 s y tras `tool.call`, `turn.complete` y `session.compact`, fallo de lectura y escrituras de estado.
+- `tests/context.test.ts`: 9 tests del formato (kit `claude-code/testing`).
+- `tests/register.test.tsx`: 19 tests del registro de hooks con un motor simulado (3 de ellos se repiten en terminal y escritorio): columna vacía desde el arranque, sin ventana conocida y con medida, vuelta a la forma vacía al perder la medida, conservación del árbol de `next(e)`, separador solo con algo al lado, colores por nivel y umbrales (70 y 85 %), refresco cada 10 s y tras `tool.call`, `turn.complete` y `session.compact`, fallo de lectura y escrituras de estado.
 
-`claude plugin test .` ejecuta los 22 tests (6 + 16).
+`claude plugin test .` ejecuta los 28 tests (9 + 19).
 
 ### Comprobación de tipos
 

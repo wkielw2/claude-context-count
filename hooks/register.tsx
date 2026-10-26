@@ -1,7 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import { describeFill } from './context'
+import { describeFill, UNMEASURED } from './context'
 import type { FillLevel } from './context'
 
 // Usage only changes after a response; the tick covers compactions and model switches.
@@ -74,7 +74,7 @@ export const register: Register = on => {
           <Text>contexto </Text>
           <Box flexDirection="column">
             <Text color={color}>{view.bar}</Text>
-            <Text color={color}> {view.percent}%{view.note ? ` ${view.note}` : ''}</Text>
+            <Text color={color}> {view.percent === undefined ? UNMEASURED : `${view.percent}%`}{view.note ? ` ${view.note}` : ''}</Text>
             <Text> {view.amount}</Text>
           </Box>
         </Box>
