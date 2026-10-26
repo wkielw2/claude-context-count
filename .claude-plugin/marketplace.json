@@ -1,0 +1,14 @@
+{
+  "name": "contexto-tokens",
+  "description": "Mod de Claude Code con el contador de tokens de contexto en el pie del prompt.",
+  "owner": {
+    "name": "wkielw2"
+  },
+  "plugins": [
+    {
+      "name": "contexto-tokens",
+      "source": "./",
+      "description": "En el pie del prompt, a la derecha, una barra con los tokens de contexto acumulados en la conversación, la ventana del modelo y el porcentaje usado."
+    }
+  ]
+}

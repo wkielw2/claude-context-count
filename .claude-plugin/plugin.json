@@ -1,0 +1,15 @@
+{
+  "name": "contexto-tokens",
+  "version": "1.0.0",
+  "description": "En el pie del prompt, a la derecha, una barra con los tokens de contexto acumulados en la conversación, la ventana del modelo y el porcentaje usado.",
+  "license": "MIT",
+  "author": {
+    "name": "wkielw2"
+  },
+  "keywords": [
+    "contexto",
+    "tokens",
+    "terminal"
+  ],
+  "types": "./types/index.d.ts"
+}
